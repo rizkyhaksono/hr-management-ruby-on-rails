@@ -1,0 +1,69 @@
+<%= form_with(model: employee, class: "form") do |f| %>
+  <% if employee.errors.any? %>
+    <div class="alert alert-danger">
+      <h4>⚠️ Terdapat <%= employee.errors.count %> kesalahan:</h4>
+      <ul>
+        <% employee.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-2">
+    <div class="form-group">
+      <%= f.label :employee_id, "ID Karyawan", class: "form-label" %>
+      <%= f.text_field :employee_id, class: "form-input", placeholder: "EMP-001" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :status, "Status", class: "form-label" %>
+      <%= f.select :status, Employee.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "form-select" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :first_name, "Nama Depan", class: "form-label" %>
+      <%= f.text_field :first_name, class: "form-input", placeholder: "Nama depan" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :last_name, "Nama Belakang", class: "form-label" %>
+      <%= f.text_field :last_name, class: "form-input", placeholder: "Nama belakang" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :email, "Email", class: "form-label" %>
+      <%= f.email_field :email, class: "form-input", placeholder: "email@perusahaan.com" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :phone, "Telepon", class: "form-label" %>
+      <%= f.phone_field :phone, class: "form-input", placeholder: "08xxxxxxxxxx" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :department, "Departemen", class: "form-label" %>
+      <%= f.select :department, [["Pilih Departemen", ""], "IT", "HR", "Finance", "Marketing", "Operations", "Sales", "Engineering", "Legal"], {}, class: "form-select" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :position, "Jabatan", class: "form-label" %>
+      <%= f.text_field :position, class: "form-input", placeholder: "Software Engineer" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :hire_date, "Tanggal Masuk", class: "form-label" %>
+      <%= f.date_field :hire_date, class: "form-input" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :salary, "Gaji (Rp)", class: "form-label" %>
+      <%= f.number_field :salary, class: "form-input", placeholder: "5000000", step: 100000 %>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <%= f.submit employee.new_record? ? "💾 Simpan Karyawan" : "💾 Update Karyawan", class: "btn btn-primary" %>
+    <%= link_to "Batal", employees_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>

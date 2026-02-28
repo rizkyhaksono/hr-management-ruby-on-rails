@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <title><%= content_for(:title) || "HR System" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="application-name" content="HR System">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  </head>
+
+  <body>
+    <div class="app-layout">
+      <nav class="sidebar">
+        <div class="sidebar-header">
+          <h2>🏢 HR System</h2>
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <%= link_to root_path, class: "nav-link #{'active' if controller_name == 'dashboard'}" do %>
+              <span class="nav-icon">📊</span>
+              <span>Dashboard</span>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to employees_path, class: "nav-link #{'active' if controller_name == 'employees'}" do %>
+              <span class="nav-icon">👥</span>
+              <span>Karyawan</span>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to leaves_path, class: "nav-link #{'active' if controller_name == 'leaves'}" do %>
+              <span class="nav-icon">🏖️</span>
+              <span>Cuti</span>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to attendances_path, class: "nav-link #{'active' if controller_name == 'attendances'}" do %>
+              <span class="nav-icon">📋</span>
+              <span>Absensi</span>
+            <% end %>
+          </li>
+        </ul>
+        <div class="sidebar-footer">
+          <small>HR System v1.0</small>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <% if notice.present? %>
+          <div class="alert alert-success" id="flash-notice">
+            <%= notice %>
+          </div>
+        <% end %>
+        <% if alert.present? %>
+          <div class="alert alert-danger" id="flash-alert">
+            <%= alert %>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </main>
+    </div>
+
+    <script>
+      // Auto-dismiss flash messages
+      document.addEventListener('turbo:load', function() {
+        setTimeout(function() {
+          var flash = document.getElementById('flash-notice') || document.getElementById('flash-alert');
+          if (flash) {
+            flash.style.transition = 'opacity 0.5s';
+            flash.style.opacity = '0';
+            setTimeout(function() { flash.remove(); }, 500);
+          }
+        }, 4000);
+      });
+    </script>
+  </body>
+</html>

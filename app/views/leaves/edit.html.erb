@@ -1,0 +1,13 @@
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>✏️ Edit Cuti</h1>
+    <p class="subtitle">Perbarui data cuti <%= @leave.employee.full_name %></p>
+  </div>
+  <%= link_to "⬅️ Kembali", leave_path(@leave), class: "btn btn-secondary" %>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <%= render "form", leave: @leave %>
+  </div>
+</div>

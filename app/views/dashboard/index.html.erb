@@ -1,0 +1,134 @@
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>🏢 HR Dashboard</h1>
+    <p class="subtitle">Sistem Manajemen Sumber Daya Manusia</p>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="stat-card stat-card-blue">
+    <div class="stat-icon">👥</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @total_employees %></span>
+      <span class="stat-label">Total Karyawan</span>
+    </div>
+  </div>
+  <div class="stat-card stat-card-green">
+    <div class="stat-icon">✅</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @active_employees %></span>
+      <span class="stat-label">Karyawan Aktif</span>
+    </div>
+  </div>
+  <div class="stat-card stat-card-orange">
+    <div class="stat-icon">⏳</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @pending_leaves %></span>
+      <span class="stat-label">Cuti Pending</span>
+    </div>
+  </div>
+  <div class="stat-card stat-card-purple">
+    <div class="stat-icon">📊</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @today_attendances %></span>
+      <span class="stat-label">Hadir Hari Ini</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h3>🏢 Karyawan per Departemen</h3>
+    </div>
+    <div class="card-body">
+      <% if @department_stats.any? %>
+        <% @department_stats.each do |dept, count| %>
+          <div class="progress-item">
+            <div class="progress-info">
+              <span><%= dept %></span>
+              <span><%= count %> orang</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: <%= (count.to_f / [@total_employees, 1].max * 100).round %>%"></div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-muted">Belum ada data</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>📊 Absensi Hari Ini</h3>
+    </div>
+    <div class="card-body">
+      <% if @monthly_attendance.any? %>
+        <div class="grid grid-2" style="gap: 0.5rem;">
+          <% @monthly_attendance.each do |status, count| %>
+            <div class="mini-stat">
+              <span class="badge badge-<%= status %>"><%= status.humanize %></span>
+              <strong><%= count %></strong>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-muted">Belum ada data absensi bulan ini</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h3>🏖️ Pengajuan Cuti Terbaru</h3>
+      <%= link_to "Lihat Semua →", leaves_path, class: "btn btn-sm btn-secondary" %>
+    </div>
+    <div class="card-body">
+      <% if @recent_leaves.any? %>
+        <% @recent_leaves.each do |leave| %>
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="avatar"><%= leave.employee.first_name[0] %><%= leave.employee.last_name[0] %></div>
+              <div>
+                <strong><%= leave.employee.full_name %></strong>
+                <small><%= leave.leave_type.humanize %> · <%= leave.duration_text %> · <%= leave.start_date.strftime("%d/%m/%Y") %></small>
+              </div>
+            </div>
+            <span class="badge badge-<%= leave.status %>"><%= leave.status.humanize %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-muted">Belum ada pengajuan cuti</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>📋 Kehadiran Hari Ini</h3>
+      <%= link_to "Lihat Semua →", attendances_path, class: "btn btn-sm btn-secondary" %>
+    </div>
+    <div class="card-body">
+      <% if @recent_attendances.any? %>
+        <% @recent_attendances.each do |att| %>
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="avatar"><%= att.employee.first_name[0] %><%= att.employee.last_name[0] %></div>
+              <div>
+                <strong><%= att.employee.full_name %></strong>
+                <small>Masuk: <%= att.check_in&.strftime("%H:%M") || "-" %> · Keluar: <%= att.check_out&.strftime("%H:%M") || "-" %></small>
+              </div>
+            </div>
+            <span class="badge badge-<%= att.status %>"><%= att.status.humanize %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-muted">Belum ada data kehadiran hari ini</p>
+      <% end %>
+    </div>
+  </div>
+</div>

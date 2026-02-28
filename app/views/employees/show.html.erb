@@ -1,0 +1,145 @@
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>👤 <%= @employee.full_name %></h1>
+    <p class="subtitle"><%= @employee.position %> - <%= @employee.department %></p>
+  </div>
+  <div class="header-actions">
+    <%= link_to "✏️ Edit", edit_employee_path(@employee), class: "btn btn-warning" %>
+    <%= link_to "⬅️ Kembali", employees_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="grid grid-3">
+  <div class="stat-card">
+    <div class="stat-icon">📅</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @employee.years_of_service %> Tahun</span>
+      <span class="stat-label">Masa Kerja</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🏖️</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @employee.total_leaves_this_year %> Hari</span>
+      <span class="stat-label">Cuti Tahun Ini</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📊</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= @employee.attendance_rate_this_month %>%</span>
+      <span class="stat-label">Kehadiran Bulan Ini</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h3>📋 Informasi Pribadi</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <span class="detail-label">ID Karyawan</span>
+        <span class="detail-value"><%= @employee.employee_id %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Nama Lengkap</span>
+        <span class="detail-value"><%= @employee.full_name %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Email</span>
+        <span class="detail-value"><%= @employee.email %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Telepon</span>
+        <span class="detail-value"><%= @employee.phone || "-" %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="detail-value"><span class="badge badge-<%= @employee.status %>"><%= @employee.status.humanize %></span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>🏢 Informasi Pekerjaan</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <span class="detail-label">Departemen</span>
+        <span class="detail-value"><%= @employee.department %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Jabatan</span>
+        <span class="detail-value"><%= @employee.position %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Tanggal Masuk</span>
+        <span class="detail-value"><%= @employee.hire_date&.strftime("%d %B %Y") %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Gaji</span>
+        <span class="detail-value">Rp <%= number_with_delimiter(@employee.salary.to_i) %></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h3>🏖️ Riwayat Cuti Terakhir</h3>
+      <%= link_to "Lihat Semua →", leaves_path(employee_id: @employee.id), class: "btn btn-sm btn-secondary" %>
+    </div>
+    <div class="card-body">
+      <% if @recent_leaves.any? %>
+        <table class="table table-sm">
+          <thead>
+            <tr><th>Tipe</th><th>Tanggal</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <% @recent_leaves.each do |leave| %>
+              <tr>
+                <td><%= leave.leave_type.humanize %></td>
+                <td><%= leave.start_date.strftime("%d/%m/%Y") %> - <%= leave.end_date.strftime("%d/%m/%Y") %></td>
+                <td><span class="badge badge-<%= leave.status %>"><%= leave.status.humanize %></span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="text-muted">Belum ada data cuti</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>📊 Absensi Terakhir</h3>
+      <%= link_to "Lihat Semua →", attendances_path(employee_id: @employee.id), class: "btn btn-sm btn-secondary" %>
+    </div>
+    <div class="card-body">
+      <% if @recent_attendances.any? %>
+        <table class="table table-sm">
+          <thead>
+            <tr><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <% @recent_attendances.each do |att| %>
+              <tr>
+                <td><%= att.date.strftime("%d/%m/%Y") %></td>
+                <td><%= att.check_in&.strftime("%H:%M") || "-" %></td>
+                <td><%= att.check_out&.strftime("%H:%M") || "-" %></td>
+                <td><span class="badge badge-<%= att.status %>"><%= att.status.humanize %></span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="text-muted">Belum ada data absensi</p>
+      <% end %>
+    </div>
+  </div>
+</div>

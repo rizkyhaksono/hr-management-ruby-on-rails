@@ -1,0 +1,69 @@
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>📊 Data Absensi</h1>
+    <p class="subtitle">Kelola kehadiran karyawan</p>
+  </div>
+  <div class="header-actions">
+    <%= link_to "📋 Absensi Massal", bulk_create_attendances_path, class: "btn btn-secondary" %>
+    <%= link_to "➕ Tambah Absensi", new_attendance_path, class: "btn btn-primary" %>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <%= form_tag attendances_path, method: :get, class: "filter-form" do %>
+    <div class="filter-group">
+      <%= date_field_tag :date, params[:date], class: "form-input", placeholder: "Pilih tanggal" %>
+      <%= select_tag :employee_id, options_for_select([["Semua Karyawan", ""]] + @employees.map { |e| [e.full_name, e.id] }, params[:employee_id]), class: "form-select" %>
+      <%= select_tag :status, options_for_select([["Semua Status", ""], ["Hadir", "present"], ["Absen", "absent"], ["Terlambat", "late"], ["Setengah Hari", "half_day"], ["Remote", "remote"]], params[:status]), class: "form-select" %>
+      <button type="submit" class="btn btn-secondary">🔍 Filter</button>
+    </div>
+  <% end %>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Karyawan</th>
+          <th>Tanggal</th>
+          <th>Masuk</th>
+          <th>Keluar</th>
+          <th>Durasi</th>
+          <th>Status</th>
+          <th>Catatan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @attendances.each do |attendance| %>
+          <tr>
+            <td>
+              <div class="employee-name">
+                <div class="avatar"><%= attendance.employee.first_name[0] %><%= attendance.employee.last_name[0] %></div>
+                <strong><%= attendance.employee.full_name %></strong>
+              </div>
+            </td>
+            <td><%= attendance.date.strftime("%d/%m/%Y") %></td>
+            <td><%= attendance.check_in&.strftime("%H:%M") || "-" %></td>
+            <td><%= attendance.check_out&.strftime("%H:%M") || "-" %></td>
+            <td><%= attendance.working_hours_text %></td>
+            <td><span class="badge badge-<%= attendance.status %>"><%= attendance.status.humanize %></span></td>
+            <td class="text-truncate"><%= attendance.notes || "-" %></td>
+            <td class="actions">
+              <%= link_to "✏️", edit_attendance_path(attendance), class: "btn btn-sm btn-warning", title: "Edit" %>
+              <%= link_to "🗑", attendance_path(attendance), data: { turbo_method: :delete, turbo_confirm: "Yakin hapus data ini?" }, class: "btn btn-sm btn-danger", title: "Hapus" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @attendances.empty? %>
+    <div class="empty-state">
+      <p>📋 Belum ada data absensi</p>
+      <%= link_to "Tambah Absensi", new_attendance_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

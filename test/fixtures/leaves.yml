@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  leave_type: 1
+  start_date: 2026-02-28
+  end_date: 2026-02-28
+  reason: MyText
+  status: 1
+  approved_by: MyString
+  days_count: 1
+
+two:
+  employee: two
+  leave_type: 1
+  start_date: 2026-02-28
+  end_date: 2026-02-28
+  reason: MyText
+  status: 1
+  approved_by: MyString
+  days_count: 1

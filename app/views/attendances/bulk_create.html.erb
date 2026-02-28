@@ -1,0 +1,66 @@
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>📋 Absensi Massal</h1>
+    <p class="subtitle">Catat absensi untuk semua karyawan sekaligus</p>
+  </div>
+  <%= link_to "⬅️ Kembali", attendances_path, class: "btn btn-secondary" %>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <%= form_tag bulk_create_attendances_path, method: :post, class: "form" do %>
+      <div class="form-group">
+        <label class="form-label">Tanggal</label>
+        <%= date_field_tag :date, params[:date] || Date.current, class: "form-input", style: "max-width: 250px;" %>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Karyawan</th>
+              <th>Status</th>
+              <th>Jam Masuk</th>
+              <th>Jam Keluar</th>
+              <th>Catatan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @employees.each do |employee| %>
+              <tr>
+                <td>
+                  <div class="employee-name">
+                    <div class="avatar"><%= employee.first_name[0] %><%= employee.last_name[0] %></div>
+                    <div>
+                      <strong><%= employee.full_name %></strong>
+                      <small class="text-muted"><%= employee.department %></small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <%= select_tag "attendances[#{employee.id}][status]",
+                    options_for_select([["-- Pilih --", ""], ["Hadir", "present"], ["Absen", "absent"], ["Terlambat", "late"], ["Setengah Hari", "half_day"], ["Remote", "remote"]]),
+                    class: "form-select form-select-sm" %>
+                </td>
+                <td>
+                  <%= datetime_local_field_tag "attendances[#{employee.id}][check_in]", nil, class: "form-input form-input-sm" %>
+                </td>
+                <td>
+                  <%= datetime_local_field_tag "attendances[#{employee.id}][check_out]", nil, class: "form-input form-input-sm" %>
+                </td>
+                <td>
+                  <%= text_field_tag "attendances[#{employee.id}][notes]", nil, class: "form-input form-input-sm", placeholder: "Catatan..." %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">💾 Simpan Semua Absensi</button>
+        <%= link_to "Batal", attendances_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

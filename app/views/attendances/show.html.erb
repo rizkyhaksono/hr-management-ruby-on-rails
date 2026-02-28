@@ -1,0 +1,50 @@
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>📊 Detail Absensi</h1>
+    <p class="subtitle"><%= @attendance.employee.full_name %> - <%= @attendance.date.strftime("%d %B %Y") %></p>
+  </div>
+  <div class="header-actions">
+    <%= link_to "✏️ Edit", edit_attendance_path(@attendance), class: "btn btn-warning" %>
+    <%= link_to "⬅️ Kembali", attendances_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3>📋 Informasi Absensi</h3>
+  </div>
+  <div class="card-body">
+    <div class="grid grid-2">
+      <div class="detail-row">
+        <span class="detail-label">Karyawan</span>
+        <span class="detail-value"><%= link_to @attendance.employee.full_name, employee_path(@attendance.employee) %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Tanggal</span>
+        <span class="detail-value"><%= @attendance.date.strftime("%d %B %Y") %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Jam Masuk</span>
+        <span class="detail-value"><%= @attendance.check_in&.strftime("%H:%M:%S") || "-" %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Jam Keluar</span>
+        <span class="detail-value"><%= @attendance.check_out&.strftime("%H:%M:%S") || "-" %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Durasi Kerja</span>
+        <span class="detail-value"><%= @attendance.working_hours_text %></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="detail-value"><span class="badge badge-<%= @attendance.status %>"><%= @attendance.status.humanize %></span></span>
+      </div>
+    </div>
+    <% if @attendance.notes.present? %>
+      <div class="detail-row" style="margin-top: 1rem;">
+        <span class="detail-label">Catatan</span>
+        <span class="detail-value"><%= @attendance.notes %></span>
+      </div>
+    <% end %>
+  </div>
+</div>
