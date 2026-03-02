@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_28_103346) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_01_000002) do
+  create_table "activities", force: :cascade do |t|
+    t.string "action", null: false
+    t.string "trackable_type"
+    t.integer "trackable_id"
+    t.string "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_activities_on_created_at"
+    t.index ["trackable_type", "trackable_id"], name: "index_activities_on_trackable_type_and_trackable_id"
+  end
+
   create_table "attendances", force: :cascade do |t|
     t.integer "employee_id", null: false
     t.date "date", null: false
@@ -39,6 +50,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_28_103346) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "leave_quota", default: 12, null: false
     t.index ["department"], name: "index_employees_on_department"
     t.index ["email"], name: "index_employees_on_email", unique: true
     t.index ["employee_id"], name: "index_employees_on_employee_id", unique: true
