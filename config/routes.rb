@@ -1,26 +1,23 @@
 Rails.application.routes.draw do
-  # Dashboard
   root "dashboard#index"
 
-  # Karyawan
   resources :employees
-
-  # Cuti
   resources :leaves do
     member do
       patch :approve
       patch :reject
     end
   end
-
-  # Absensi
   resources :attendances do
     collection do
       get :bulk_create
       post :bulk_create
+      get :calendar
     end
   end
 
-  # Health check
+  resources :reports, only: [:index]
+  get "search", to: "search#index"
+
   get "up" => "rails/health#show", as: :rails_health_check
 end
