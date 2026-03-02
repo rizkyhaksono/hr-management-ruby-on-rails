@@ -2,12 +2,23 @@ class EmployeesController < ApplicationController
   before_action :set_employee, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @employees = Employee.all
-    @employees = @employees.search(params[:search]) if params[:search].present?
-    @employees = @employees.by_department(params[:department]) if params[:department].present?
-    @employees = @employees.by_status(params[:status]) if params[:status].present?
-    @employees = @employees.recent.page_records(params[:page])
-    @departments = Employee.distinct.pluck(:department).compact.sort
+    @all_employees = Employee.all
+    @all_employees = @all_employees.search(params[:search]) if params[:search].present?
+    @all_employees = @all_employees.by_department(params[:department]) if params[:department].present?
+    @all_employees = @all_employees.by_status(params[:status]) if params[:status].present?
+    @all_employees = @all_employees.recent
+
+    respond_to do |format|
+      format.html do
+        @current_page = (params[:page] || 1).to_i
+        @total_pages = Employee.total_pages(@all_employees)
+        @employees = @all_employees.page_records(params[:page])
+        @departments = Employee.distinct.pluck(:department).compact.sort
+      end
+      format.csv do
+        send_data generate_csv(@all_employees), filename: "karyawan-#{Date.current}.csv", type: "text/csv"
+      end
+    end
   end
 
   def show
@@ -40,7 +51,9 @@ class EmployeesController < ApplicationController
   end
 
   def destroy
+    name = @employee.full_name
     @employee.destroy
+    Activity.log(action: "employee_deleted", description: "Karyawan dihapus: #{name}")
     redirect_to employees_path, notice: "Karyawan berhasil dihapus.", status: :see_other
   end
 
@@ -51,6 +64,16 @@ class EmployeesController < ApplicationController
   end
 
   def employee_params
-    params.require(:employee).permit(:employee_id, :first_name, :last_name, :email, :phone, :department, :position, :hire_date, :salary, :status)
+    params.require(:employee).permit(:employee_id, :first_name, :last_name, :email, :phone, :department, :position, :hire_date, :salary, :status, :leave_quota)
+  end
+
+  def generate_csv(employees)
+    require "csv"
+    CSV.generate(headers: true) do |csv|
+      csv << ["ID Karyawan", "Nama Depan", "Nama Belakang", "Email", "Telepon", "Departemen", "Jabatan", "Tanggal Masuk", "Gaji", "Status"]
+      employees.each do |e|
+        csv << [e.employee_id, e.first_name, e.last_name, e.email, e.phone, e.department, e.position, e.hire_date, e.salary, e.status]
+      end
+    end
   end
 end

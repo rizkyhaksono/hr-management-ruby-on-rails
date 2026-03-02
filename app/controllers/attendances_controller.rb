@@ -2,16 +2,23 @@ class AttendancesController < ApplicationController
   before_action :set_attendance, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @attendances = Attendance.includes(:employee).all
-    @attendances = @attendances.by_status(params[:status]) if params[:status].present?
-    if params[:date].present?
-      @attendances = @attendances.where(date: params[:date])
+    @all_attendances = Attendance.includes(:employee).all
+    @all_attendances = @all_attendances.by_status(params[:status]) if params[:status].present?
+    @all_attendances = @all_attendances.where(date: params[:date]) if params[:date].present?
+    @all_attendances = @all_attendances.where(employee_id: params[:employee_id]) if params[:employee_id].present?
+    @all_attendances = @all_attendances.recent
+
+    respond_to do |format|
+      format.html do
+        @current_page = (params[:page] || 1).to_i
+        @total_pages = Attendance.total_pages(@all_attendances)
+        @attendances = @all_attendances.page_records(params[:page])
+        @employees = Employee.active.order(:first_name)
+      end
+      format.csv do
+        send_data generate_csv(@all_attendances), filename: "absensi-#{Date.current}.csv", type: "text/csv"
+      end
     end
-    if params[:employee_id].present?
-      @attendances = @attendances.where(employee_id: params[:employee_id])
-    end
-    @attendances = @attendances.recent.page_records(params[:page])
-    @employees = Employee.active.order(:first_name)
   end
 
   def show
@@ -67,8 +74,21 @@ class AttendancesController < ApplicationController
         )
         success_count += 1 if attendance.save
       end
+      Activity.log(action: "attendance_bulk", description: "Absensi massal: #{success_count} karyawan dicatat")
       redirect_to attendances_path, notice: "#{success_count} absensi berhasil dicatat."
     end
+  end
+
+  def calendar
+    @month = params[:month] ? Date.parse(params[:month] + "-01") : Date.current.beginning_of_month
+    @employee = params[:employee_id].present? ? Employee.find(params[:employee_id]) : nil
+    @employees = Employee.active.order(:first_name)
+
+    scope = Attendance.where(date: @month.beginning_of_month..@month.end_of_month)
+    scope = scope.where(employee_id: @employee.id) if @employee
+
+    @attendances_by_date = scope.group(:date, :status).count
+    @summary = scope.group(:status).count
   end
 
   private
@@ -79,5 +99,15 @@ class AttendancesController < ApplicationController
 
   def attendance_params
     params.require(:attendance).permit(:employee_id, :date, :check_in, :check_out, :status, :notes)
+  end
+
+  def generate_csv(attendances)
+    require "csv"
+    CSV.generate(headers: true) do |csv|
+      csv << ["Karyawan", "Tanggal", "Jam Masuk", "Jam Keluar", "Durasi", "Status", "Catatan"]
+      attendances.each do |a|
+        csv << [a.employee.full_name, a.date, a.check_in&.strftime("%H:%M"), a.check_out&.strftime("%H:%M"), a.working_hours_text, a.status, a.notes]
+      end
+    end
   end
 end
