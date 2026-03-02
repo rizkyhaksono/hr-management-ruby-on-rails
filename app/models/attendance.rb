@@ -7,6 +7,8 @@ class Attendance < ApplicationRecord
   validates :date, uniqueness: { scope: :employee_id, message: "sudah ada catatan absensi untuk tanggal ini" }
   validate :check_out_after_check_in
 
+  after_create_commit { Activity.log(action: "attendance_created", trackable: self, description: "Absensi #{employee.full_name}: #{status.humanize}") }
+
   scope :recent, -> { order(date: :desc) }
   scope :today, -> { where(date: Date.current) }
   scope :this_month, -> { where(date: Date.current.beginning_of_month..Date.current.end_of_month) }

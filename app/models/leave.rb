@@ -12,6 +12,7 @@ class Leave < ApplicationRecord
   validate :no_overlapping_leaves
 
   before_save :calculate_days_count
+  after_create_commit { Activity.log(action: "leave_created", trackable: self, description: "#{employee.full_name} mengajukan cuti #{leave_type.humanize}") }
 
   scope :recent, -> { order(created_at: :desc) }
   scope :this_year, -> { where("start_date >= ?", Date.current.beginning_of_year) }
