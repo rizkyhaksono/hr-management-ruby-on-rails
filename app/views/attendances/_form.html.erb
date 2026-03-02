@@ -1,12 +1,15 @@
 <%= form_with(model: attendance, class: "form") do |f| %>
   <% if attendance.errors.any? %>
     <div class="alert alert-danger">
-      <h4>⚠️ Terdapat <%= attendance.errors.count %> kesalahan:</h4>
-      <ul>
-        <% attendance.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+      <%= icon(:alert_circle) %>
+      <div>
+        <strong>Terdapat <%= attendance.errors.count %> kesalahan:</strong>
+        <ul style="margin-top: 0.25rem; padding-left: 1rem; list-style: disc;">
+          <% attendance.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
   <% end %>
 
@@ -15,22 +18,18 @@
       <%= f.label :employee_id, "Karyawan", class: "form-label" %>
       <%= f.collection_select :employee_id, @employees, :id, :full_name, { prompt: "Pilih Karyawan" }, class: "form-select" %>
     </div>
-
     <div class="form-group">
       <%= f.label :date, "Tanggal", class: "form-label" %>
       <%= f.date_field :date, class: "form-input" %>
     </div>
-
     <div class="form-group">
       <%= f.label :check_in, "Jam Masuk", class: "form-label" %>
       <%= f.datetime_local_field :check_in, class: "form-input" %>
     </div>
-
     <div class="form-group">
       <%= f.label :check_out, "Jam Keluar", class: "form-label" %>
       <%= f.datetime_local_field :check_out, class: "form-input" %>
     </div>
-
     <div class="form-group">
       <%= f.label :status, "Status", class: "form-label" %>
       <%= f.select :status, [["Hadir", "present"], ["Absen", "absent"], ["Terlambat", "late"], ["Setengah Hari", "half_day"], ["Remote", "remote"]], { prompt: "Pilih Status" }, class: "form-select" %>
@@ -43,7 +42,7 @@
   </div>
 
   <div class="form-actions">
-    <%= f.submit attendance.new_record? ? "💾 Simpan Absensi" : "💾 Update Absensi", class: "btn btn-primary" %>
     <%= link_to "Batal", attendances_path, class: "btn btn-secondary" %>
+    <%= f.submit attendance.new_record? ? "Simpan Absensi" : "Update Absensi", class: "btn btn-primary" %>
   </div>
 <% end %>

@@ -1,17 +1,21 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Absensi", path: attendances_path }, { label: "Detail" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>📊 Detail Absensi</h1>
-    <p class="subtitle"><%= @attendance.employee.full_name %> - <%= @attendance.date.strftime("%d %B %Y") %></p>
+    <h1>Detail Absensi</h1>
+    <p class="subtitle"><%= @attendance.employee.full_name %> &mdash; <%= @attendance.date.strftime("%d %B %Y") %></p>
   </div>
   <div class="header-actions">
-    <%= link_to "✏️ Edit", edit_attendance_path(@attendance), class: "btn btn-warning" %>
-    <%= link_to "⬅️ Kembali", attendances_path, class: "btn btn-secondary" %>
+    <%= link_to edit_attendance_path(@attendance), class: "btn btn-secondary" do %><%= icon(:pencil) %> Edit<% end %>
+    <%= link_to attendances_path, class: "btn btn-secondary" do %><%= icon(:arrow_left) %> Kembali<% end %>
   </div>
 </div>
 
 <div class="card">
   <div class="card-header">
-    <h3>📋 Informasi Absensi</h3>
+    <h3><%= icon(:clock) %> Informasi Absensi</h3>
   </div>
   <div class="card-body">
     <div class="grid grid-2">

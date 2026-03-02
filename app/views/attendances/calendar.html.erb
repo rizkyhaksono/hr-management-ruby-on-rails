@@ -1,0 +1,81 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Absensi", path: attendances_path }, { label: "Kalender" }) %>
+<% end %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>Kalender Kehadiran</h1>
+    <p class="subtitle">Visualisasi kehadiran bulanan</p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-body">
+    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+      <%= form_tag calendar_attendances_path, method: :get, style: "display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;" do %>
+        <%= hidden_field_tag :month, @month.strftime("%Y-%m") %>
+        <%= select_tag :employee_id, options_for_select([["Semua Karyawan", ""]] + @employees.map { |e| [e.full_name, e.id] }, params[:employee_id]), class: "form-select", style: "width: auto; min-width: 200px;", onchange: "this.form.submit();" %>
+      <% end %>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+        <%= link_to calendar_attendances_path(month: (@month - 1.month).strftime("%Y-%m"), employee_id: params[:employee_id]), class: "btn btn-sm btn-secondary" do %>
+          <%= icon(:chevron_left) %>
+        <% end %>
+        <span class="fw-600" style="min-width: 140px; text-align: center;"><%= I18n.l(@month, format: "%B %Y") rescue @month.strftime("%B %Y") %></span>
+        <%= link_to calendar_attendances_path(month: (@month + 1.month).strftime("%Y-%m"), employee_id: params[:employee_id]), class: "btn btn-sm btn-secondary" do %>
+          <%= icon(:chevron_right) %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="grid grid-4" style="margin-bottom: 1.5rem;">
+  <% %w[present late absent remote].each do |s| %>
+    <div class="mini-stat">
+      <span class="badge badge-<%= s %>"><%= s.humanize %></span>
+      <strong style="font-size: 1.125rem; margin-top: 0.25rem;"><%= @summary[s] || 0 %></strong>
+    </div>
+  <% end %>
+</div>
+
+<!-- Calendar Grid -->
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="calendar-grid">
+      <% %w[Sen Sel Rab Kam Jum Sab Min].each do |day| %>
+        <div class="calendar-day-header"><%= day %></div>
+      <% end %>
+
+      <% first_day = @month.beginning_of_month %>
+      <% start_day = first_day.beginning_of_week(:monday) %>
+      <% end_day = @month.end_of_month.end_of_week(:monday) %>
+
+      <% (start_day..end_day).each do |date| %>
+        <% outside = date.month != @month.month %>
+        <% today = date == Date.current %>
+        <div class="calendar-day <%= 'outside' if outside %> <%= 'today' if today %>">
+          <div class="calendar-date"><%= date.day %></div>
+          <% unless outside %>
+            <% @attendances_by_date.each do |(d, status), count| %>
+              <% if d == date %>
+                <% count.times do %>
+                  <span class="calendar-dot <%= status %>" title="<%= status.humanize %>: <%= count %>"></span>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div style="display: flex; gap: 1.5rem; margin-top: 1rem; font-size: 0.8125rem; color: var(--color-text-secondary); flex-wrap: wrap;">
+  <div style="display: flex; align-items: center; gap: 0.375rem;"><span class="calendar-dot present"></span> Hadir</div>
+  <div style="display: flex; align-items: center; gap: 0.375rem;"><span class="calendar-dot late"></span> Terlambat</div>
+  <div style="display: flex; align-items: center; gap: 0.375rem;"><span class="calendar-dot absent"></span> Absen</div>
+  <div style="display: flex; align-items: center; gap: 0.375rem;"><span class="calendar-dot remote"></span> Remote</div>
+  <div style="display: flex; align-items: center; gap: 0.375rem;"><span class="calendar-dot half_day"></span> Setengah Hari</div>
+</div>

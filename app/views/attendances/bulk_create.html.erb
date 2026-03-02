@@ -1,9 +1,13 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Absensi", path: attendances_path }, { label: "Absensi Massal" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>📋 Absensi Massal</h1>
+    <h1>Absensi Massal</h1>
     <p class="subtitle">Catat absensi untuk semua karyawan sekaligus</p>
   </div>
-  <%= link_to "⬅️ Kembali", attendances_path, class: "btn btn-secondary" %>
+  <%= link_to attendances_path, class: "btn btn-secondary" do %><%= icon(:arrow_left) %> Kembali<% end %>
 </div>
 
 <div class="card">
@@ -30,10 +34,10 @@
               <tr>
                 <td>
                   <div class="employee-name">
-                    <div class="avatar"><%= employee.first_name[0] %><%= employee.last_name[0] %></div>
+                    <div class="avatar"><%= employee.initials %></div>
                     <div>
                       <strong><%= employee.full_name %></strong>
-                      <small class="text-muted"><%= employee.department %></small>
+                      <small><%= employee.department %></small>
                     </div>
                   </div>
                 </td>
@@ -42,15 +46,9 @@
                     options_for_select([["-- Pilih --", ""], ["Hadir", "present"], ["Absen", "absent"], ["Terlambat", "late"], ["Setengah Hari", "half_day"], ["Remote", "remote"]]),
                     class: "form-select form-select-sm" %>
                 </td>
-                <td>
-                  <%= datetime_local_field_tag "attendances[#{employee.id}][check_in]", nil, class: "form-input form-input-sm" %>
-                </td>
-                <td>
-                  <%= datetime_local_field_tag "attendances[#{employee.id}][check_out]", nil, class: "form-input form-input-sm" %>
-                </td>
-                <td>
-                  <%= text_field_tag "attendances[#{employee.id}][notes]", nil, class: "form-input form-input-sm", placeholder: "Catatan..." %>
-                </td>
+                <td><%= datetime_local_field_tag "attendances[#{employee.id}][check_in]", nil, class: "form-input form-input-sm" %></td>
+                <td><%= datetime_local_field_tag "attendances[#{employee.id}][check_out]", nil, class: "form-input form-input-sm" %></td>
+                <td><%= text_field_tag "attendances[#{employee.id}][notes]", nil, class: "form-input form-input-sm", placeholder: "Catatan..." %></td>
               </tr>
             <% end %>
           </tbody>
@@ -58,8 +56,8 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">💾 Simpan Semua Absensi</button>
         <%= link_to "Batal", attendances_path, class: "btn btn-secondary" %>
+        <button type="submit" class="btn btn-primary"><%= icon(:check) %> Simpan Semua Absensi</button>
       </div>
     <% end %>
   </div>
