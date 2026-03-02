@@ -1,0 +1,27 @@
+---
+description: ERB views, Stimulus, dan CSS conventions
+globs: app/views/**/*.erb, app/assets/**/*.css, app/javascript/**/*.js
+alwaysApply: false
+---
+
+# Frontend & View Standards
+
+## ERB Views
+
+- Gunakan `icon(:nama_icon)` dari ApplicationHelper, bukan emoji
+- `content_for(:breadcrumbs)` untuk breadcrumb di layout
+- `render "shared/pagination"` dengan `total_pages`, `current_page`
+- Class: `card`, `stat-card`, `btn btn-primary`, `badge badge-<status>`
+
+## Stimulus Controllers
+
+- Naming: `*_controller.js`, register dengan kebab-case
+- Value: `data-*-value`, Target: `data-*-target`
+- `connect()`, `disconnect()` untuk setup/teardown
+
+## CSS
+
+- Variabel: `--primary-500`, `--color-text`, `--radius-lg`
+- Dark mode: `[data-theme="dark"]`
+- Animasi: `fadeInUp`, `slideInRight`, `animate-fade-in-up`
+- Jangan inline style kecuali dinamis (width, --ring-percent)

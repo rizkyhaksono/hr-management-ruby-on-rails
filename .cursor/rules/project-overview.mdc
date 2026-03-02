@@ -1,0 +1,30 @@
+---
+description: HR System project overview and tech stack
+alwaysApply: true
+---
+
+# HR System - Project Overview
+
+Aplikasi web **Ruby on Rails 7.2** untuk manajemen karyawan, absensi, dan cuti.
+
+## Tech Stack
+
+- **Ruby** 3.3.0
+- **Rails** 7.2
+- **Database** SQLite (development/test), configurable untuk production
+- **Frontend** ERB, Stimulus.js, Turbo, Chart.js, Importmap
+- **Assets** Propshaft, Inter font
+- **Deployment** Kamal (Docker)
+
+## Struktur Utama
+
+- `app/controllers/` - Dashboard, Employees, Attendances, Leaves, Reports, Search
+- `app/models/` - Employee, Attendance, Leave, Activity
+- `app/helpers/` - `icon(name)` untuk SVG, `breadcrumbs()`, `format_currency()`, `time_ago_short()`
+- `app/javascript/controllers/` - Stimulus: sidebar, dark_mode, animated_counter, chart, toast, search, dropdown, tabs
+
+## Konvensi
+
+- **Bahasa UI**: Indonesia
+- **Naming**: snake_case (Ruby), kebab-case (CSS classes)
+- **Views**: Gunakan helper `icon(:name)` bukan emoji

@@ -1,0 +1,32 @@
+---
+description: Ruby dan Rails coding standards
+globs: app/**/*.rb, config/**/*.rb, db/**/*.rb, lib/**/*.rb
+alwaysApply: false
+---
+
+# Ruby & Rails Standards
+
+## Controllers
+
+- Gunakan `before_action :set_resource` untuk resource-based controllers
+- `respond_to` untuk format HTML dan CSV pada index
+- Strong parameters wajib di `*_params` private method
+- Redirect dengan `notice:` atau `alert:` untuk feedback
+
+```ruby
+# Format CSV export
+format.csv { send_data generate_csv(scope), filename: "data-#{Date.current}.csv" }
+```
+
+## Models
+
+- Validasi di bagian atas
+- Scope untuk query yang reusable
+- Callback `after_create_commit`, `after_update_commit` untuk Activity logging
+- Enum untuk status/tipe: `enum :status, { pending: 0, approved: 1 }`
+
+## Migrations
+
+- Gunakan `add_index` untuk kolom yang sering di-query
+- `add_foreign_key` untuk relasi
+- `null: false`, `default:` jika perlu
