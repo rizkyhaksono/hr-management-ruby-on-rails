@@ -1,9 +1,20 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Cuti" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>🏖️ Manajemen Cuti</h1>
+    <h1>Manajemen Cuti</h1>
     <p class="subtitle">Kelola pengajuan dan persetujuan cuti</p>
   </div>
-  <%= link_to "➕ Ajukan Cuti", new_leave_path, class: "btn btn-primary" %>
+  <div class="header-actions">
+    <%= link_to leaves_path(format: :csv, **request.query_parameters.except(:page)), class: "btn btn-secondary" do %>
+      <%= icon(:download) %> Export CSV
+    <% end %>
+    <%= link_to new_leave_path, class: "btn btn-primary" do %>
+      <%= icon(:plus) %> Ajukan Cuti
+    <% end %>
+  </div>
 </div>
 
 <div class="filters-bar">
@@ -11,7 +22,7 @@
     <div class="filter-group">
       <%= select_tag :status, options_for_select([["Semua Status", ""], ["Pending", "pending"], ["Disetujui", "approved"], ["Ditolak", "rejected"], ["Dibatalkan", "cancelled"]], params[:status]), class: "form-select" %>
       <%= select_tag :leave_type, options_for_select([["Semua Tipe", ""], ["Tahunan", "annual"], ["Sakit", "sick"], ["Pribadi", "personal"], ["Melahirkan", "maternity"], ["Paternity", "paternity"], ["Tanpa Gaji", "unpaid"]], params[:leave_type]), class: "form-select" %>
-      <button type="submit" class="btn btn-secondary">🔍 Filter</button>
+      <button type="submit" class="btn btn-secondary"><%= icon(:filter) %> Filter</button>
     </div>
   <% end %>
 </div>
@@ -35,10 +46,10 @@
           <tr>
             <td>
               <div class="employee-name">
-                <div class="avatar"><%= leave.employee.first_name[0] %><%= leave.employee.last_name[0] %></div>
+                <div class="avatar"><%= leave.employee.initials %></div>
                 <div>
                   <strong><%= leave.employee.full_name %></strong>
-                  <small class="text-muted"><%= leave.employee.department %></small>
+                  <small><%= leave.employee.department %></small>
                 </div>
               </div>
             </td>
@@ -48,10 +59,10 @@
             <td><%= leave.duration_text %></td>
             <td><span class="badge badge-<%= leave.status %>"><%= leave.status.humanize %></span></td>
             <td class="actions">
-              <%= link_to "👁", leave_path(leave), class: "btn btn-sm btn-info", title: "Detail" %>
+              <%= link_to leave_path(leave), class: "btn btn-sm btn-secondary", title: "Detail" do %><%= icon(:eye) %><% end %>
               <% if leave.pending? %>
-                <%= link_to "✅", approve_leave_path(leave), data: { turbo_method: :patch, turbo_confirm: "Setujui cuti ini?" }, class: "btn btn-sm btn-success", title: "Setujui" %>
-                <%= link_to "❌", reject_leave_path(leave), data: { turbo_method: :patch, turbo_confirm: "Tolak cuti ini?" }, class: "btn btn-sm btn-danger", title: "Tolak" %>
+                <%= link_to approve_leave_path(leave), data: { turbo_method: :patch, turbo_confirm: "Setujui cuti ini?" }, class: "btn btn-sm btn-success", title: "Setujui" do %><%= icon(:check) %><% end %>
+                <%= link_to reject_leave_path(leave), data: { turbo_method: :patch, turbo_confirm: "Tolak cuti ini?" }, class: "btn btn-sm btn-danger", title: "Tolak" do %><%= icon(:x) %><% end %>
               <% end %>
             </td>
           </tr>
@@ -62,8 +73,14 @@
 
   <% if @leaves.empty? %>
     <div class="empty-state">
-      <p>📋 Belum ada data cuti</p>
-      <%= link_to "Ajukan Cuti Pertama", new_leave_path, class: "btn btn-primary" %>
+      <div class="empty-state-icon"><%= icon(:calendar) %></div>
+      <h3>Belum ada data cuti</h3>
+      <p>Mulai dengan mengajukan cuti.</p>
+      <%= link_to new_leave_path, class: "btn btn-primary" do %>
+        <%= icon(:plus) %> Ajukan Cuti
+      <% end %>
     </div>
   <% end %>
+
+  <%= render "shared/pagination", total_pages: @total_pages, current_page: @current_page %>
 </div>

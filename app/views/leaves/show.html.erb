@@ -1,22 +1,26 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Cuti", path: leaves_path }, { label: "Detail" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>🏖️ Detail Cuti</h1>
-    <p class="subtitle"><%= @leave.employee.full_name %> - <%= @leave.leave_type.humanize %></p>
+    <h1>Detail Cuti</h1>
+    <p class="subtitle"><%= @leave.employee.full_name %> &mdash; <%= @leave.leave_type.humanize %></p>
   </div>
   <div class="header-actions">
     <% if @leave.pending? %>
-      <%= link_to "✅ Setujui", approve_leave_path(@leave), data: { turbo_method: :patch, turbo_confirm: "Setujui cuti ini?" }, class: "btn btn-success" %>
-      <%= link_to "❌ Tolak", reject_leave_path(@leave), data: { turbo_method: :patch, turbo_confirm: "Tolak cuti ini?" }, class: "btn btn-danger" %>
+      <%= link_to approve_leave_path(@leave), data: { turbo_method: :patch, turbo_confirm: "Setujui cuti ini?" }, class: "btn btn-success" do %><%= icon(:check) %> Setujui<% end %>
+      <%= link_to reject_leave_path(@leave), data: { turbo_method: :patch, turbo_confirm: "Tolak cuti ini?" }, class: "btn btn-danger" do %><%= icon(:x) %> Tolak<% end %>
     <% end %>
-    <%= link_to "✏️ Edit", edit_leave_path(@leave), class: "btn btn-warning" %>
-    <%= link_to "⬅️ Kembali", leaves_path, class: "btn btn-secondary" %>
+    <%= link_to edit_leave_path(@leave), class: "btn btn-secondary" do %><%= icon(:pencil) %> Edit<% end %>
+    <%= link_to leaves_path, class: "btn btn-secondary" do %><%= icon(:arrow_left) %> Kembali<% end %>
   </div>
 </div>
 
 <div class="grid grid-2">
   <div class="card">
     <div class="card-header">
-      <h3>📋 Informasi Cuti</h3>
+      <h3><%= icon(:calendar) %> Informasi Cuti</h3>
     </div>
     <div class="card-body">
       <div class="detail-row">
@@ -52,10 +56,20 @@
 
   <div class="card">
     <div class="card-header">
-      <h3>📝 Alasan Cuti</h3>
+      <h3><%= icon(:file_text) %> Alasan Cuti</h3>
     </div>
     <div class="card-body">
       <p><%= @leave.reason || "Tidak ada alasan yang diberikan" %></p>
+
+      <% if @leave.employee %>
+        <div class="leave-balance mt-4" style="--ring-percent: <%= @leave.employee.leave_usage_percent %>%;">
+          <div class="leave-balance-ring"></div>
+          <div class="leave-balance-info">
+            <strong>Sisa Cuti: <%= @leave.employee.leave_balance %> hari</strong>
+            <small>Kuota: <%= @leave.employee.leave_quota || 12 %> hari &middot; Terpakai: <%= @leave.employee.total_leaves_this_year %> hari</small>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
