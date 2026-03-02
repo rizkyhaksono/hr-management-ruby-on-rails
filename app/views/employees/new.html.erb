@@ -1,9 +1,13 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Karyawan", path: employees_path }, { label: "Tambah Baru" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>➕ Tambah Karyawan Baru</h1>
+    <h1>Tambah Karyawan Baru</h1>
     <p class="subtitle">Isi data karyawan baru</p>
   </div>
-  <%= link_to "⬅️ Kembali", employees_path, class: "btn btn-secondary" %>
+  <%= link_to employees_path, class: "btn btn-secondary" do %><%= icon(:arrow_left) %> Kembali<% end %>
 </div>
 
 <div class="card">

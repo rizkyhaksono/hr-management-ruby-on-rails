@@ -1,9 +1,20 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Karyawan" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>👥 Data Karyawan</h1>
+    <h1>Data Karyawan</h1>
     <p class="subtitle">Kelola data karyawan perusahaan</p>
   </div>
-  <%= link_to "➕ Tambah Karyawan", new_employee_path, class: "btn btn-primary" %>
+  <div class="header-actions">
+    <%= link_to employees_path(format: :csv, **request.query_parameters.except(:page)), class: "btn btn-secondary" do %>
+      <%= icon(:download) %> Export CSV
+    <% end %>
+    <%= link_to new_employee_path, class: "btn btn-primary" do %>
+      <%= icon(:plus) %> Tambah Karyawan
+    <% end %>
+  </div>
 </div>
 
 <div class="filters-bar">
@@ -12,7 +23,7 @@
       <%= text_field_tag :search, params[:search], placeholder: "Cari nama, email, ID...", class: "form-input" %>
       <%= select_tag :department, options_for_select([["Semua Departemen", ""]] + @departments.map { |d| [d, d] }, params[:department]), class: "form-select" %>
       <%= select_tag :status, options_for_select([["Semua Status", ""], ["Aktif", "active"], ["Tidak Aktif", "inactive"], ["Cuti", "on_leave"], ["Resign", "terminated"]], params[:status]), class: "form-select" %>
-      <button type="submit" class="btn btn-secondary">🔍 Filter</button>
+      <button type="submit" class="btn btn-secondary"><%= icon(:filter) %> Filter</button>
     </div>
   <% end %>
 </div>
@@ -37,10 +48,10 @@
             <td><span class="badge badge-light"><%= employee.employee_id %></span></td>
             <td>
               <div class="employee-name">
-                <div class="avatar"><%= employee.first_name[0] %><%= employee.last_name[0] %></div>
+                <div class="avatar"><%= employee.initials %></div>
                 <div>
                   <strong><%= employee.full_name %></strong>
-                  <small class="text-muted"><%= employee.phone %></small>
+                  <small><%= employee.phone %></small>
                 </div>
               </div>
             </td>
@@ -49,9 +60,9 @@
             <td><%= employee.position %></td>
             <td><span class="badge badge-<%= employee.status %>"><%= employee.status.humanize %></span></td>
             <td class="actions">
-              <%= link_to "👁", employee_path(employee), class: "btn btn-sm btn-info", title: "Detail" %>
-              <%= link_to "✏️", edit_employee_path(employee), class: "btn btn-sm btn-warning", title: "Edit" %>
-              <%= link_to "🗑", employee_path(employee), data: { turbo_method: :delete, turbo_confirm: "Yakin hapus #{employee.full_name}?" }, class: "btn btn-sm btn-danger", title: "Hapus" %>
+              <%= link_to employee_path(employee), class: "btn btn-sm btn-secondary", title: "Detail" do %><%= icon(:eye) %><% end %>
+              <%= link_to edit_employee_path(employee), class: "btn btn-sm btn-secondary", title: "Edit" do %><%= icon(:pencil) %><% end %>
+              <%= link_to employee_path(employee), data: { turbo_method: :delete, turbo_confirm: "Yakin hapus #{employee.full_name}?" }, class: "btn btn-sm btn-danger", title: "Hapus" do %><%= icon(:trash) %><% end %>
             </td>
           </tr>
         <% end %>
@@ -61,8 +72,14 @@
 
   <% if @employees.empty? %>
     <div class="empty-state">
-      <p>📋 Belum ada data karyawan</p>
-      <%= link_to "Tambah Karyawan Pertama", new_employee_path, class: "btn btn-primary" %>
+      <div class="empty-state-icon"><%= icon(:users) %></div>
+      <h3>Belum ada data karyawan</h3>
+      <p>Mulai dengan menambahkan karyawan pertama.</p>
+      <%= link_to new_employee_path, class: "btn btn-primary" do %>
+        <%= icon(:plus) %> Tambah Karyawan
+      <% end %>
     </div>
   <% end %>
+
+  <%= render "shared/pagination", total_pages: @total_pages, current_page: @current_page %>
 </div>
