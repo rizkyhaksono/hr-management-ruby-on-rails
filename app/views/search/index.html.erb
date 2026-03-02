@@ -1,0 +1,44 @@
+<% if @employees.any? %>
+  <div class="search-category">Karyawan</div>
+  <% @employees.each do |emp| %>
+    <%= link_to employee_path(emp), class: "search-result-item" do %>
+      <div class="avatar avatar-sm"><%= emp.initials %></div>
+      <div>
+        <div style="font-weight: 500;"><%= emp.full_name %></div>
+        <div style="font-size: 0.75rem; color: var(--color-text-secondary);"><%= emp.department %> &middot; <%= emp.position %></div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if @leaves.any? %>
+  <div class="search-category">Cuti</div>
+  <% @leaves.each do |leave| %>
+    <%= link_to leave_path(leave), class: "search-result-item" do %>
+      <div class="avatar avatar-sm"><%= leave.employee.initials %></div>
+      <div>
+        <div style="font-weight: 500;"><%= leave.employee.full_name %> - <%= leave.leave_type.humanize %></div>
+        <div style="font-size: 0.75rem; color: var(--color-text-secondary);"><%= leave.start_date.strftime("%d/%m/%Y") %> &middot; <span class="badge badge-<%= leave.status %>"><%= leave.status.humanize %></span></div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if @attendances.any? %>
+  <div class="search-category">Absensi</div>
+  <% @attendances.each do |att| %>
+    <%= link_to attendance_path(att), class: "search-result-item" do %>
+      <div class="avatar avatar-sm"><%= att.employee.initials %></div>
+      <div>
+        <div style="font-weight: 500;"><%= att.employee.full_name %></div>
+        <div style="font-size: 0.75rem; color: var(--color-text-secondary);"><%= att.date.strftime("%d/%m/%Y") %> &middot; <span class="badge badge-<%= att.status %>"><%= att.status.humanize %></span></div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if @employees.empty? && @leaves.empty? && @attendances.empty? %>
+  <div style="padding: 1.5rem; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+    Tidak ada hasil untuk "<%= @query %>"
+  </div>
+<% end %>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light" data-controller="dark-mode">
   <head>
     <title><%= content_for(:title) || "HR System" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,74 +8,146 @@
     <%= csp_meta_tag %>
     <%= yield :head %>
     <link rel="icon" href="/icon.png" type="image/png">
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <div class="app-layout">
-      <nav class="sidebar">
+    <div class="app-layout" data-controller="sidebar">
+      <!-- Sidebar -->
+      <aside class="sidebar" data-sidebar-target="sidebar">
         <div class="sidebar-header">
-          <h2>🏢 HR System</h2>
+          <div class="sidebar-logo"><%= icon(:building) %></div>
+          <span class="sidebar-brand">HR System</span>
         </div>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <%= link_to root_path, class: "nav-link #{'active' if controller_name == 'dashboard'}" do %>
-              <span class="nav-icon">📊</span>
-              <span>Dashboard</span>
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to employees_path, class: "nav-link #{'active' if controller_name == 'employees'}" do %>
-              <span class="nav-icon">👥</span>
-              <span>Karyawan</span>
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to leaves_path, class: "nav-link #{'active' if controller_name == 'leaves'}" do %>
-              <span class="nav-icon">🏖️</span>
-              <span>Cuti</span>
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to attendances_path, class: "nav-link #{'active' if controller_name == 'attendances'}" do %>
-              <span class="nav-icon">📋</span>
-              <span>Absensi</span>
-            <% end %>
-          </li>
-        </ul>
-        <div class="sidebar-footer">
-          <small>HR System v1.0</small>
-        </div>
-      </nav>
 
+        <nav class="sidebar-nav">
+          <div class="nav-section-title">Menu Utama</div>
+          <%= link_to root_path, class: "nav-link #{'active' if controller_name == 'dashboard'}" do %>
+            <span class="nav-icon"><%= icon(:dashboard) %></span>
+            <span>Dashboard</span>
+          <% end %>
+          <%= link_to employees_path, class: "nav-link #{'active' if controller_name == 'employees'}" do %>
+            <span class="nav-icon"><%= icon(:users) %></span>
+            <span>Karyawan</span>
+          <% end %>
+          <%= link_to attendances_path, class: "nav-link #{'active' if controller_name == 'attendances'}" do %>
+            <span class="nav-icon"><%= icon(:clock) %></span>
+            <span>Absensi</span>
+          <% end %>
+          <%= link_to leaves_path, class: "nav-link #{'active' if controller_name == 'leaves'}" do %>
+            <span class="nav-icon"><%= icon(:calendar) %></span>
+            <span>Cuti</span>
+            <% pending = Leave.pending.count rescue 0 %>
+            <% if pending > 0 %>
+              <span class="nav-badge"><%= pending %></span>
+            <% end %>
+          <% end %>
+
+          <div class="nav-section-title">Analitik</div>
+          <%= link_to reports_path, class: "nav-link #{'active' if controller_name == 'reports'}" do %>
+            <span class="nav-icon"><%= icon(:chart_bar) %></span>
+            <span>Laporan</span>
+          <% end %>
+          <%= link_to calendar_attendances_path, class: "nav-link #{'active' if action_name == 'calendar'}" do %>
+            <span class="nav-icon"><%= icon(:calendar) %></span>
+            <span>Kalender</span>
+          <% end %>
+        </nav>
+
+        <div class="sidebar-footer">HR System v2.0</div>
+      </aside>
+
+      <!-- Sidebar Overlay (mobile) -->
+      <div class="sidebar-overlay" data-sidebar-target="overlay" data-action="click->sidebar#close"></div>
+
+      <!-- Main Content -->
       <main class="main-content">
-        <% if notice.present? %>
-          <div class="alert alert-success" id="flash-notice">
-            <%= notice %>
+        <!-- Top Header -->
+        <header class="top-header">
+          <div class="header-left">
+            <button class="hamburger-btn" data-action="click->sidebar#toggle" aria-label="Toggle menu">
+              <%= icon(:menu) %>
+            </button>
+            <% if content_for?(:breadcrumbs) %>
+              <%= yield(:breadcrumbs) %>
+            <% else %>
+              <%= breadcrumbs({ label: "Home", path: root_path }, { label: controller_name.humanize }) %>
+            <% end %>
           </div>
-        <% end %>
-        <% if alert.present? %>
-          <div class="alert alert-danger" id="flash-alert">
-            <%= alert %>
-          </div>
-        <% end %>
 
-        <%= yield %>
+          <div class="header-right">
+            <!-- Search -->
+            <div class="header-search" data-controller="search">
+              <span class="header-search-icon"><%= icon(:search) %></span>
+              <input type="text" class="header-search-input" placeholder="Cari karyawan, cuti, absensi..." data-search-target="input" data-action="input->search#search" autocomplete="off">
+              <div class="search-results" data-search-target="results"></div>
+            </div>
+
+            <!-- Dark Mode Toggle -->
+            <button class="header-icon-btn" data-action="click->dark-mode#toggle" title="Toggle tema" aria-label="Toggle dark mode">
+              <span data-dark-mode-target="icon"><%= icon(:moon) %></span>
+            </button>
+
+            <!-- Notifications -->
+            <div class="dropdown" data-controller="dropdown">
+              <button class="header-icon-btn" data-action="click->dropdown#toggle" aria-label="Notifikasi">
+                <%= icon(:bell) %>
+                <% activity_count = Activity.where("created_at > ?", 24.hours.ago).count rescue 0 %>
+                <% if activity_count > 0 %>
+                  <span class="notification-dot"></span>
+                <% end %>
+              </button>
+              <div class="dropdown-menu notification-list" data-dropdown-target="menu">
+                <div class="dropdown-header">Aktivitas Terbaru</div>
+                <% (Activity.order(created_at: :desc).limit(5) rescue []).each do |activity| %>
+                  <div class="notification-item">
+                    <div class="notification-icon blue"><%= icon(:activity) %></div>
+                    <div>
+                      <div class="notification-text"><%= activity.description %></div>
+                      <div class="notification-time"><%= time_ago_short(activity.created_at) %></div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- User Menu -->
+            <div class="user-menu">
+              <div class="user-menu-avatar">A</div>
+              <span class="user-menu-name">Admin</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container">
+          <% if notice.present? %>
+            <div class="toast toast-success" data-controller="toast">
+              <span class="toast-icon"><%= icon(:check_circle) %></span>
+              <span class="toast-content"><%= notice %></span>
+              <button class="toast-close" data-action="click->toast#dismiss"><%= icon(:x) %></button>
+              <div class="toast-progress"></div>
+            </div>
+          <% end %>
+          <% if alert.present? %>
+            <div class="toast toast-danger" data-controller="toast">
+              <span class="toast-icon"><%= icon(:alert_circle) %></span>
+              <span class="toast-content"><%= alert %></span>
+              <button class="toast-close" data-action="click->toast#dismiss"><%= icon(:x) %></button>
+              <div class="toast-progress"></div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <%= yield %>
+        </div>
       </main>
     </div>
-
-    <script>
-      // Auto-dismiss flash messages
-      document.addEventListener('turbo:load', function() {
-        setTimeout(function() {
-          var flash = document.getElementById('flash-notice') || document.getElementById('flash-alert');
-          if (flash) {
-            flash.style.transition = 'opacity 0.5s';
-            flash.style.opacity = '0';
-            setTimeout(function() { flash.remove(); }, 500);
-          }
-        }, 4000);
-      });
-    </script>
   </body>
 </html>

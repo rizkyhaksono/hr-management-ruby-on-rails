@@ -1,0 +1,28 @@
+<% if total_pages && total_pages > 1 %>
+  <div class="pagination">
+    <% if current_page > 1 %>
+      <%= link_to url_for(request.query_parameters.merge(page: current_page - 1)), class: "pagination-btn" do %>
+        <%= icon(:chevron_left) %>
+      <% end %>
+    <% else %>
+      <button class="pagination-btn" disabled><%= icon(:chevron_left) %></button>
+    <% end %>
+
+    <% window = 2 %>
+    <% (1..total_pages).each do |page| %>
+      <% if page == 1 || page == total_pages || (page >= current_page - window && page <= current_page + window) %>
+        <%= link_to page, url_for(request.query_parameters.merge(page: page)), class: "pagination-btn #{page == current_page ? 'active' : ''}" %>
+      <% elsif page == current_page - window - 1 || page == current_page + window + 1 %>
+        <span class="pagination-info">...</span>
+      <% end %>
+    <% end %>
+
+    <% if current_page < total_pages %>
+      <%= link_to url_for(request.query_parameters.merge(page: current_page + 1)), class: "pagination-btn" do %>
+        <%= icon(:chevron_right) %>
+      <% end %>
+    <% else %>
+      <button class="pagination-btn" disabled><%= icon(:chevron_right) %></button>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,160 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Home", path: root_path }, { label: "Laporan" }) %>
+<% end %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <h1>Laporan & Analitik</h1>
+    <p class="subtitle">Analisis data karyawan, absensi, dan cuti</p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <%= form_tag reports_path, method: :get, class: "filter-form" do %>
+    <div class="filter-group">
+      <div class="form-group mb-0">
+        <label class="form-label">Dari Tanggal</label>
+        <%= date_field_tag :date_from, @date_from, class: "form-input" %>
+      </div>
+      <div class="form-group mb-0">
+        <label class="form-label">Sampai Tanggal</label>
+        <%= date_field_tag :date_to, @date_to, class: "form-input" %>
+      </div>
+      <div class="form-group mb-0">
+        <label class="form-label">Departemen</label>
+        <%= select_tag :department, options_for_select([["Semua Departemen", ""]] + @departments.map { |d| [d, d] }, @department), class: "form-select" %>
+      </div>
+      <button type="submit" class="btn btn-primary"><%= icon(:filter) %> Filter</button>
+    </div>
+  <% end %>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid grid-4" style="margin-bottom: 1.5rem;">
+  <div class="stat-card stat-card-blue">
+    <div class="stat-icon-wrap"><%= icon(:users) %></div>
+    <div class="stat-info">
+      <span class="stat-label">Total Karyawan</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @total_employees %>"><%= @total_employees %></span>
+    </div>
+  </div>
+  <div class="stat-card stat-card-green">
+    <div class="stat-icon-wrap"><%= icon(:check_circle) %></div>
+    <div class="stat-info">
+      <span class="stat-label">Total Kehadiran</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @total_attendances %>"><%= @total_attendances %></span>
+    </div>
+  </div>
+  <div class="stat-card stat-card-orange">
+    <div class="stat-icon-wrap"><%= icon(:calendar) %></div>
+    <div class="stat-info">
+      <span class="stat-label">Hari Cuti (Approved)</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @total_leave_days %>"><%= @total_leave_days %></span>
+    </div>
+  </div>
+  <div class="stat-card stat-card-cyan">
+    <div class="stat-icon-wrap"><%= icon(:trending_up) %></div>
+    <div class="stat-info">
+      <span class="stat-label">Karyawan Baru</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @new_hires %>"><%= @new_hires %></span>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-2" style="margin-bottom: 1.5rem;">
+  <div class="card">
+    <div class="card-header">
+      <h3><%= icon(:trending_up) %> Tren Kehadiran Harian</h3>
+    </div>
+    <div class="card-body">
+      <% if @attendance_by_day.any? %>
+        <div class="chart-container" style="height: 280px;"
+          data-controller="chart"
+          data-chart-type-value="line"
+          data-chart-labels-value="<%= @attendance_by_day.map { |d, _| d.strftime('%d/%m') }.to_json %>"
+          data-chart-datasets-value='<%= [
+            { label: "Total", data: @attendance_by_day.map(&:last), borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.1)", fill: true, tension: 0.4 },
+            { label: "Hadir", data: @attendance_by_day.map { |d, _| @present_by_day[d] || 0 }, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.1)", fill: true, tension: 0.4 }
+          ].to_json %>'>
+          <canvas></canvas>
+        </div>
+      <% else %>
+        <p class="text-muted text-center">Tidak ada data untuk periode ini</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3><%= icon(:chart_bar) %> Cuti per Tipe</h3>
+    </div>
+    <div class="card-body">
+      <% if @leaves_by_type.any? %>
+        <div class="chart-container" style="height: 280px;"
+          data-controller="chart"
+          data-chart-type-value="doughnut"
+          data-chart-labels-value="<%= @leaves_by_type.keys.map(&:humanize).to_json %>"
+          data-chart-datasets-value='<%= [{
+            data: @leaves_by_type.values,
+            backgroundColor: ["#6366f1","#ec4899","#f59e0b","#8b5cf6","#06b6d4","#94a3b8"],
+            borderWidth: 0, hoverOffset: 8
+          }].to_json %>'>
+          <canvas></canvas>
+        </div>
+      <% else %>
+        <p class="text-muted text-center">Tidak ada data cuti</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h3><%= icon(:building) %> Karyawan per Departemen</h3>
+    </div>
+    <div class="card-body">
+      <% if @department_stats.any? %>
+        <div class="chart-container" style="height: 280px;"
+          data-controller="chart"
+          data-chart-type-value="bar"
+          data-chart-labels-value="<%= @department_stats.map(&:first).to_json %>"
+          data-chart-datasets-value='<%= [{
+            label: "Karyawan",
+            data: @department_stats.map(&:last),
+            backgroundColor: ["#6366f1","#8b5cf6","#06b6d4","#10b981","#f59e0b","#ef4444","#ec4899","#14b8a6","#f97316","#84cc16"],
+            borderWidth: 0, borderRadius: 6
+          }].to_json %>'>
+          <canvas></canvas>
+        </div>
+      <% else %>
+        <p class="text-muted text-center">Tidak ada data departemen</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3><%= icon(:clock) %> Status Kehadiran</h3>
+    </div>
+    <div class="card-body">
+      <% if @attendance_by_status.any? %>
+        <% @attendance_by_status.each do |status, count| %>
+          <div class="progress-item">
+            <div class="progress-info">
+              <span class="badge badge-<%= status %>"><%= status.humanize %></span>
+              <span class="fw-600"><%= count %></span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: <%= (count.to_f / [@total_attendances, 1].max * 100).round %>%"></div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-muted text-center">Tidak ada data kehadiran</p>
+      <% end %>
+    </div>
+  </div>
+</div>
