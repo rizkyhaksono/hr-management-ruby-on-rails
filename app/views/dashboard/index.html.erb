@@ -1,45 +1,120 @@
+<% content_for(:breadcrumbs) do %>
+  <%= breadcrumbs({ label: "Dashboard" }) %>
+<% end %>
+
 <div class="page-header">
   <div class="page-header-content">
-    <h1>🏢 HR Dashboard</h1>
-    <p class="subtitle">Sistem Manajemen Sumber Daya Manusia</p>
+    <h1>Dashboard</h1>
+    <p class="subtitle">Ringkasan sistem manajemen sumber daya manusia</p>
   </div>
 </div>
 
-<div class="grid grid-4">
+<!-- Stat Cards -->
+<div class="grid grid-4" style="margin-bottom: 1.5rem;">
   <div class="stat-card stat-card-blue">
-    <div class="stat-icon">👥</div>
+    <div class="stat-icon-wrap"><%= icon(:users) %></div>
     <div class="stat-info">
-      <span class="stat-value"><%= @total_employees %></span>
       <span class="stat-label">Total Karyawan</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @total_employees %>"><%= @total_employees %></span>
     </div>
   </div>
   <div class="stat-card stat-card-green">
-    <div class="stat-icon">✅</div>
+    <div class="stat-icon-wrap"><%= icon(:check_circle) %></div>
     <div class="stat-info">
-      <span class="stat-value"><%= @active_employees %></span>
       <span class="stat-label">Karyawan Aktif</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @active_employees %>"><%= @active_employees %></span>
     </div>
   </div>
   <div class="stat-card stat-card-orange">
-    <div class="stat-icon">⏳</div>
+    <div class="stat-icon-wrap"><%= icon(:clock) %></div>
     <div class="stat-info">
-      <span class="stat-value"><%= @pending_leaves %></span>
       <span class="stat-label">Cuti Pending</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @pending_leaves %>"><%= @pending_leaves %></span>
     </div>
   </div>
   <div class="stat-card stat-card-purple">
-    <div class="stat-icon">📊</div>
+    <div class="stat-icon-wrap"><%= icon(:activity) %></div>
     <div class="stat-info">
-      <span class="stat-value"><%= @today_attendances %></span>
       <span class="stat-label">Hadir Hari Ini</span>
+      <span class="stat-value" data-controller="animated-counter" data-animated-counter-target-value="<%= @today_attendances %>"><%= @today_attendances %></span>
     </div>
   </div>
 </div>
 
-<div class="grid grid-2">
+<!-- Quick Actions -->
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-body">
+    <div class="quick-actions">
+      <%= link_to new_employee_path, class: "quick-action-btn" do %>
+        <div class="quick-action-icon"><%= icon(:plus) %></div>
+        <span>Tambah Karyawan</span>
+      <% end %>
+      <%= link_to new_attendance_path, class: "quick-action-btn" do %>
+        <div class="quick-action-icon green"><%= icon(:clock) %></div>
+        <span>Catat Absensi</span>
+      <% end %>
+      <%= link_to new_leave_path, class: "quick-action-btn" do %>
+        <div class="quick-action-icon orange"><%= icon(:calendar) %></div>
+        <span>Ajukan Cuti</span>
+      <% end %>
+      <%= link_to bulk_create_attendances_path, class: "quick-action-btn" do %>
+        <div class="quick-action-icon purple"><%= icon(:users) %></div>
+        <span>Absensi Massal</span>
+      <% end %>
+      <%= link_to reports_path, class: "quick-action-btn" do %>
+        <div class="quick-action-icon cyan"><%= icon(:chart_bar) %></div>
+        <span>Laporan</span>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid grid-2" style="margin-bottom: 1.5rem;">
   <div class="card">
     <div class="card-header">
-      <h3>🏢 Karyawan per Departemen</h3>
+      <h3><%= icon(:trending_up) %> Tren Kehadiran (7 Hari)</h3>
+    </div>
+    <div class="card-body">
+      <div class="chart-container" style="height: 250px;"
+        data-controller="chart"
+        data-chart-type-value="line"
+        data-chart-labels-value="<%= @attendance_trend.map { |d, _| d.strftime('%d/%m') }.to_json %>"
+        data-chart-datasets-value='<%= [
+          { label: "Total Absensi", data: @attendance_trend.map(&:last), borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.1)", fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 },
+          { label: "Hadir", data: @attendance_trend.map { |d, _| @present_trend[d] || 0 }, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.1)", fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6 }
+        ].to_json %>'>
+        <canvas></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3><%= icon(:building) %> Karyawan per Departemen</h3>
+    </div>
+    <div class="card-body">
+      <div class="chart-container" style="height: 250px;"
+        data-controller="chart"
+        data-chart-type-value="doughnut"
+        data-chart-labels-value="<%= @department_stats.map(&:first).to_json %>"
+        data-chart-datasets-value='<%= [{
+          data: @department_stats.map(&:last),
+          backgroundColor: ["#6366f1","#8b5cf6","#06b6d4","#10b981","#f59e0b","#ef4444","#ec4899","#14b8a6","#f97316","#84cc16"],
+          borderWidth: 0,
+          hoverOffset: 8
+        }].to_json %>'>
+        <canvas></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Department Progress + Attendance Today -->
+<div class="grid grid-2" style="margin-bottom: 1.5rem;">
+  <div class="card">
+    <div class="card-header">
+      <h3><%= icon(:building) %> Distribusi Departemen</h3>
     </div>
     <div class="card-body">
       <% if @department_stats.any? %>
@@ -47,7 +122,7 @@
           <div class="progress-item">
             <div class="progress-info">
               <span><%= dept %></span>
-              <span><%= count %> orang</span>
+              <span class="fw-600"><%= count %> orang</span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" style="width: <%= (count.to_f / [@total_employees, 1].max * 100).round %>%"></div>
@@ -62,15 +137,15 @@
 
   <div class="card">
     <div class="card-header">
-      <h3>📊 Absensi Hari Ini</h3>
+      <h3><%= icon(:clock) %> Status Absensi Bulan Ini</h3>
     </div>
     <div class="card-body">
       <% if @monthly_attendance.any? %>
-        <div class="grid grid-2" style="gap: 0.5rem;">
+        <div class="grid grid-2" style="gap: 0.75rem;">
           <% @monthly_attendance.each do |status, count| %>
             <div class="mini-stat">
               <span class="badge badge-<%= status %>"><%= status.humanize %></span>
-              <strong><%= count %></strong>
+              <strong style="font-size: 1.25rem; margin-top: 0.25rem;"><%= count %></strong>
             </div>
           <% end %>
         </div>
@@ -81,53 +156,50 @@
   </div>
 </div>
 
+<!-- Recent Leaves + Activity Timeline -->
 <div class="grid grid-2">
   <div class="card">
     <div class="card-header">
-      <h3>🏖️ Pengajuan Cuti Terbaru</h3>
-      <%= link_to "Lihat Semua →", leaves_path, class: "btn btn-sm btn-secondary" %>
+      <h3><%= icon(:calendar) %> Pengajuan Cuti Terbaru</h3>
+      <%= link_to "Lihat Semua", leaves_path, class: "btn btn-sm btn-secondary" %>
     </div>
     <div class="card-body">
       <% if @recent_leaves.any? %>
         <% @recent_leaves.each do |leave| %>
           <div class="list-item">
             <div class="list-item-info">
-              <div class="avatar"><%= leave.employee.first_name[0] %><%= leave.employee.last_name[0] %></div>
+              <div class="avatar"><%= leave.employee.initials %></div>
               <div>
                 <strong><%= leave.employee.full_name %></strong>
-                <small><%= leave.leave_type.humanize %> · <%= leave.duration_text %> · <%= leave.start_date.strftime("%d/%m/%Y") %></small>
+                <small><%= leave.leave_type.humanize %> &middot; <%= leave.duration_text %> &middot; <%= leave.start_date.strftime("%d/%m/%Y") %></small>
               </div>
             </div>
             <span class="badge badge-<%= leave.status %>"><%= leave.status.humanize %></span>
           </div>
         <% end %>
       <% else %>
-        <p class="text-muted">Belum ada pengajuan cuti</p>
+        <p class="text-muted text-center mt-3">Belum ada pengajuan cuti</p>
       <% end %>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <h3>📋 Kehadiran Hari Ini</h3>
-      <%= link_to "Lihat Semua →", attendances_path, class: "btn btn-sm btn-secondary" %>
+      <h3><%= icon(:activity) %> Aktivitas Terbaru</h3>
     </div>
     <div class="card-body">
-      <% if @recent_attendances.any? %>
-        <% @recent_attendances.each do |att| %>
-          <div class="list-item">
-            <div class="list-item-info">
-              <div class="avatar"><%= att.employee.first_name[0] %><%= att.employee.last_name[0] %></div>
-              <div>
-                <strong><%= att.employee.full_name %></strong>
-                <small>Masuk: <%= att.check_in&.strftime("%H:%M") || "-" %> · Keluar: <%= att.check_out&.strftime("%H:%M") || "-" %></small>
-              </div>
+      <% if @recent_activities.any? %>
+        <div class="timeline">
+          <% @recent_activities.each_with_index do |act, i| %>
+            <div class="timeline-item" style="animation-delay: <%= i * 60 %>ms;">
+              <div class="timeline-dot <%= act.dot_class %>"></div>
+              <div class="timeline-content"><%= act.description %></div>
+              <div class="timeline-time"><%= time_ago_short(act.created_at) %></div>
             </div>
-            <span class="badge badge-<%= att.status %>"><%= att.status.humanize %></span>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       <% else %>
-        <p class="text-muted">Belum ada data kehadiran hari ini</p>
+        <p class="text-muted text-center mt-3">Belum ada aktivitas</p>
       <% end %>
     </div>
   </div>
